@@ -13,15 +13,27 @@ FF is a lightweight framework that leverages Amp's native features to enable str
 
 ## Installation
 
+### Quick Install (Recommended)
+
 ```bash
-# Clone to your project
-git clone https://github.com/anthropics/ff-project.git
+cd your-project
+npx ff-project init
+```
+
+Options:
+- `--yes` - Skip confirmation prompts
+- `--force` - Overwrite existing files
+- `--dry-run` - Preview changes without modifying files
+- `--verbose` - Show detailed output
+
+### Manual Install
+
+```bash
+git clone https://github.com/fran0220/ff-project.git
 cp -r ff-project/.agents your-project/
 cp -r ff-project/.ff your-project/
 cp ff-project/AGENTS.md your-project/
 ```
-
-Or copy the `.agents/skills/` directory to your existing Amp project.
 
 ## Skills
 

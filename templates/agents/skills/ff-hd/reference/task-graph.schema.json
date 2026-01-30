@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FF Task Graph (Simplified)",
+  "description": "Lightweight task tracking for long/hard mode",
+  "type": "object",
+  "required": ["version", "prd_path", "tasks"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.1"
+    },
+    "prd_path": {
+      "type": "string",
+      "description": "Path to source prd.md"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "depends_on", "status"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^T[0-9]+$",
+            "description": "Task identifier (T0, T1, T2...)"
+          },
+          "title": {
+            "type": "string",
+            "description": "Short task title"
+          },
+          "depends_on": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Task IDs this task depends on (empty = independent)"
+          },
+          "acceptance": {
+            "type": "string",
+            "description": "Single acceptance criterion"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["todo", "in_progress", "done"],
+            "default": "todo"
+          }
+        }
+      }
+    }
+  }
+}
