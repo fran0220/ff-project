@@ -1,7 +1,7 @@
 ---
 name: ff-hd
 description: "Handle complex tasks with parallel execution. Use for multi-task features requiring brainstorming, task decomposition, and coordinated implementation."
-mode: deep
+mode: smart
 argument-hint: "<task-name>"
 ---
 

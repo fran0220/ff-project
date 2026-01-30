@@ -1,7 +1,7 @@
 ---
 name: ff-linear
 description: "Sync with Linear. Use when starting a task, updating progress, or completing work."
-mode: smart
+mode: rush
 ---
 
 # FF Linear Integration

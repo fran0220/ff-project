@@ -1,7 +1,7 @@
 ---
 name: ff-finish
 description: "Pre-commit checklist. Use before committing changes."
-mode: smart
+mode: rush
 ---
 
 # FF Finish

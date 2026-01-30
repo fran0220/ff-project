@@ -14,9 +14,9 @@ See @.ff/spec/shared/index.md
 | `ff-start` | smart | Begin session |
 | `ff-implement` | deep | Write code |
 | `ff-check` | deep | Review code |
-| `ff-finish` | smart | Before commit |
-| `ff-linear` | smart | Sync with Linear |
-| `ff-hd` | deep | Complex multi-task features |
+| `ff-finish` | rush | Before commit |
+| `ff-linear` | rush | Sync with Linear |
+| `ff-hd` | smart | Complex multi-task (coordinator) |
 
 ## Workflows
 
