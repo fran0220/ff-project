@@ -42,9 +42,18 @@ cp ff-project/AGENTS.md your-project/
 | `ff-start` | smart | Initialize session, read specs |
 | `ff-implement` | deep | Write code with extended thinking |
 | `ff-check` | deep | Review code changes |
-| `ff-finish` | smart | Pre-commit checklist |
-| `ff-linear` | smart | Linear issue tracking integration |
-| `ff-hd` | deep | Complex multi-task parallel execution |
+| `ff-finish` | rush | Pre-commit checklist |
+| `ff-linear` | rush | Linear issue tracking integration |
+| `ff-hd` | smart | Complex multi-task coordinator |
+| `ff-update` | smart | Capture learnings, update specs |
+
+### Mode Selection Philosophy
+
+| Mode | Strength | Use For |
+|------|----------|---------|
+| **smart** | Planning, coordination, decision-making | ff-start, ff-hd, ff-update |
+| **deep** | Complex reasoning, code generation | ff-implement, ff-check |
+| **rush** | Fast execution, simple tasks | ff-finish, ff-linear |
 
 ## Workflows
 
