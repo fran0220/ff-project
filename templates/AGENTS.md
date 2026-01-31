@@ -17,7 +17,8 @@ See @.ff/spec/shared/index.md
 | `ff-finish` | rush | Before commit |
 | `ff-linear` | rush | Sync with Linear |
 | `ff-hd` | smart | Complex multi-task (coordinator) |
-| `ff-update` | smart | Capture learnings, update specs |
+| `ff-init` | smart | Initialize or update FF |
+| `ff-update` | smart | Alias for ff-init |
 
 ## Workflows
 

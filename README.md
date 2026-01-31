@@ -13,26 +13,29 @@ FF is a lightweight framework that leverages Amp's native features to enable str
 
 ## Installation
 
+### Option 1: In Amp (Recommended)
+
+If you already have Amp, install the ff-init skill globally:
+
+```bash
+amp skill add fran0220/ff-project/ff-init
+```
+
+Then in any project:
+```
+load ff-init
+```
+
+### Option 2: Bootstrap Script
+
+For cold start (no Amp environment):
+
 ```bash
 cd your-project
 curl -fsSL https://github.com/fran0220/ff-project/raw/main/install.sh | sh
 ```
 
-Options:
-- `--force` - Overwrite existing files
-- `--verbose` - Show detailed output
-- `--ref <tag>` - Use specific version (default: main)
-
-Example with options:
-```bash
-curl -fsSL https://github.com/fran0220/ff-project/raw/main/install.sh | sh -s -- --force --verbose
-```
-
-**Requirements:** `curl`, `tar`, `awk` (standard on macOS/Linux)
-
-**File policy:**
-- `.agents/skills/`, `.ff/spec/`: Skip existing files (use `--force` to overwrite)
-- `AGENTS.md`: Uses managed block `<!-- ff-project:begin -->...<!-- ff-project:end -->` (safe to add content outside block)
+This installs the minimum needed, then run `load ff-init` in Amp to complete.
 
 ## Skills
 
@@ -44,7 +47,8 @@ curl -fsSL https://github.com/fran0220/ff-project/raw/main/install.sh | sh -s --
 | `ff-finish` | rush | Pre-commit checklist |
 | `ff-linear` | rush | Linear issue tracking integration |
 | `ff-hd` | smart | Complex multi-task coordinator |
-| `ff-update` | smart | Capture learnings, update specs |
+| `ff-init` | smart | Initialize or update FF framework |
+| `ff-update` | smart | Alias for ff-init |
 
 ### Mode Selection Philosophy
 

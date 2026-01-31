@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "ffVersion": "",
+  "installedAt": "",
+  "updatedAt": "",
+  "projectType": "",
+  "repo": "fran0220/ff-project",
+  "ref": "main",
+  "managedPaths": [
+    ".agents/skills/ff-start/",
+    ".agents/skills/ff-implement/",
+    ".agents/skills/ff-check/",
+    ".agents/skills/ff-finish/",
+    ".agents/skills/ff-hd/",
+    ".agents/skills/ff-linear/",
+    ".agents/skills/ff-init/",
+    ".agents/skills/ff-update/",
+    ".ff/spec/",
+    "AGENTS.md"
+  ],
+  "checksums": {}
+}

@@ -20,6 +20,8 @@ required_files=(
   ".agents/skills/ff-hd/reference/task-extraction.md"
   ".agents/skills/ff-hd/reference/task-graph.schema.json"
   ".agents/skills/ff-hd/reference/prd.template.md"
+  ".agents/skills/ff-init/SKILL.md"
+  ".agents/skills/ff-update/SKILL.md"
   ".ff/spec/guides/index.md"
   ".ff/spec/shared/index.md"
   "AGENTS.md"
@@ -59,6 +61,8 @@ check_frontmatter ".agents/skills/ff-check/SKILL.md" "ff-check" "deep"
 check_frontmatter ".agents/skills/ff-finish/SKILL.md" "ff-finish" "rush"
 check_frontmatter ".agents/skills/ff-linear/SKILL.md" "ff-linear" "rush"
 check_frontmatter ".agents/skills/ff-hd/SKILL.md" "ff-hd" "smart"
+check_frontmatter ".agents/skills/ff-init/SKILL.md" "ff-init" "smart"
+check_frontmatter ".agents/skills/ff-update/SKILL.md" "ff-update" "smart"
 
 echo ""
 
