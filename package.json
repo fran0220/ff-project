@@ -1,30 +1,8 @@
 {
   "name": "ff-project",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Spec-driven development framework for Amp",
-  "type": "module",
-  "bin": {
-    "ff-project": "bin/ff-project.js"
-  },
-  "files": [
-    "bin/",
-    "src/",
-    "templates/",
-    "README.md",
-    "LICENSE"
-  ],
-  "engines": {
-    "node": ">=18"
-  },
-  "keywords": [
-    "amp",
-    "ai",
-    "development",
-    "framework",
-    "skills",
-    "spec-driven"
-  ],
-  "author": "",
+  "private": true,
   "license": "MIT",
   "repository": {
     "type": "git",

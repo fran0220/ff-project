@@ -15,7 +15,6 @@ required_files=(
   ".agents/skills/ff-check/SKILL.md"
   ".agents/skills/ff-finish/SKILL.md"
   ".agents/skills/ff-linear/SKILL.md"
-  ".agents/skills/ff-linear/mcp.json"
   ".agents/skills/ff-hd/SKILL.md"
   ".agents/skills/ff-hd/reference/brainstorming.md"
   ".agents/skills/ff-hd/reference/task-extraction.md"
@@ -57,33 +56,14 @@ check_frontmatter() {
 check_frontmatter ".agents/skills/ff-start/SKILL.md" "ff-start" "smart"
 check_frontmatter ".agents/skills/ff-implement/SKILL.md" "ff-implement" "deep"
 check_frontmatter ".agents/skills/ff-check/SKILL.md" "ff-check" "deep"
-check_frontmatter ".agents/skills/ff-finish/SKILL.md" "ff-finish" "smart"
-check_frontmatter ".agents/skills/ff-linear/SKILL.md" "ff-linear" "smart"
-check_frontmatter ".agents/skills/ff-hd/SKILL.md" "ff-hd" "deep"
-
-echo ""
-
-# Check mcp.json
-echo "3. Checking ff-linear mcp.json..."
-
-if grep -q "includeTools" ".agents/skills/ff-linear/mcp.json"; then
-  echo "  ✓ includeTools defined (token optimization)"
-else
-  echo "  ✗ includeTools missing"
-  missing=$((missing + 1))
-fi
-
-if grep -q "LINEAR_API_TOKEN" ".agents/skills/ff-linear/mcp.json"; then
-  echo "  ✓ LINEAR_API_TOKEN reference"
-else
-  echo "  ✗ LINEAR_API_TOKEN missing"
-  missing=$((missing + 1))
-fi
+check_frontmatter ".agents/skills/ff-finish/SKILL.md" "ff-finish" "rush"
+check_frontmatter ".agents/skills/ff-linear/SKILL.md" "ff-linear" "rush"
+check_frontmatter ".agents/skills/ff-hd/SKILL.md" "ff-hd" "smart"
 
 echo ""
 
 # Check AGENTS.md references
-echo "4. Checking AGENTS.md spec references..."
+echo "3. Checking AGENTS.md spec references..."
 
 if grep -q "@.ff/spec" "AGENTS.md"; then
   echo "  ✓ Spec @-mentions found"

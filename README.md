@@ -13,27 +13,26 @@ FF is a lightweight framework that leverages Amp's native features to enable str
 
 ## Installation
 
-### Quick Install (Recommended)
-
 ```bash
 cd your-project
-npx ff-project init
+curl -fsSL https://raw.githubusercontent.com/fran0220/ff-project/main/install.sh | sh
 ```
 
 Options:
-- `--yes` - Skip confirmation prompts
 - `--force` - Overwrite existing files
-- `--dry-run` - Preview changes without modifying files
 - `--verbose` - Show detailed output
+- `--ref <tag>` - Use specific version (default: main)
 
-### Manual Install
-
+Example with options:
 ```bash
-git clone https://github.com/fran0220/ff-project.git
-cp -r ff-project/.agents your-project/
-cp -r ff-project/.ff your-project/
-cp ff-project/AGENTS.md your-project/
+curl -fsSL https://raw.githubusercontent.com/fran0220/ff-project/main/install.sh | sh -s -- --force --verbose
 ```
+
+**Requirements:** `curl`, `tar`, `awk` (standard on macOS/Linux)
+
+**File policy:**
+- `.agents/skills/`, `.ff/spec/`: Skip existing files (use `--force` to overwrite)
+- `AGENTS.md`: Uses managed block `<!-- ff-project:begin -->...<!-- ff-project:end -->` (safe to add content outside block)
 
 ## Skills
 
@@ -162,13 +161,7 @@ Thread B: "ff-hd: payment"   → .ff/tasks/2026-01-31-payment/
 
 ## Linear Integration
 
-Optional integration with Linear for issue tracking. Requires `LINEAR_API_TOKEN` environment variable.
-
-```bash
-export LINEAR_API_TOKEN="lin_api_xxxxx"
-```
-
-The MCP server is bundled in `ff-linear/mcp.json` and auto-registers when the skill loads.
+Optional integration with Linear for issue tracking. Requires system-level Linear MCP server deployment with `LINEAR_API_TOKEN` configured.
 
 ## Configuration
 
