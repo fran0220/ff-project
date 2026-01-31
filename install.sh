@@ -28,7 +28,7 @@ EOF
 }
 
 log() { printf "%s\n" "$*"; }
-vlog() { [ "$VERBOSE" -eq 1 ] && printf "  %s\n" "$*"; }
+vlog() { [ "$VERBOSE" -eq 1 ] && printf "  %s\n" "$*" || true; }
 die() { printf "Error: %s\n" "$*" >&2; exit 1; }
 
 while [ $# -gt 0 ]; do
