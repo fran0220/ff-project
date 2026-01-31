@@ -1,198 +1,93 @@
 ---
 name: ff-update
-description: "Update specs from code learnings. Use after fixing bugs, discovering patterns, or establishing conventions."
+description: "Update FF framework templates. Use to get latest skills, specs, and tools."
 mode: smart
 ---
 
 # FF Update
 
-Capture learnings and update specs to keep constraints in sync with codebase.
+Update FF framework templates to the latest version.
 
-## When to Use
+## Quick Start
 
-| Trigger | Action |
-|---------|--------|
-| Fixed a bug | Update error-handling or quality guidelines |
-| Discovered a pattern | Add to patterns section |
-| Hit a gotcha | Document as non-obvious behavior |
-| Established convention | Update relevant spec |
-| Cross-layer insight | Update thinking guides |
+Run the update engine:
 
-## Process
-
-### Step 1: Analyze What You Learned
-
-Ask yourself:
-- What was the root cause?
-- Why wasn't this caught earlier?
-- How can we prevent this in the future?
-
-### Step 2: Categorize the Learning
-
-```
-┌─────────────────────────────────────────┐
-│  1. Missing spec          → Add to spec │
-│  2. Cross-layer contract  → Update guide│
-│  3. Change propagation    → Add checklist│
-│  4. Test gap              → Document pattern│
-│  5. Implicit assumption   → Make explicit│
-└─────────────────────────────────────────┘
+```bash
+sh .ff/bin/ff-update
 ```
 
-### Step 3: Update the Right Spec
+## Modes
 
-| Learning Type | Target Spec |
-|--------------|-------------|
-| Backend pattern | `.ff/spec/backend/index.md` |
-| Frontend pattern | `.ff/spec/frontend/index.md` |
-| TypeScript convention | `.ff/spec/shared/index.md` |
-| Cross-layer issue | `.ff/spec/guides/cross-layer.md` |
-| Code reuse pattern | `.ff/spec/guides/code-reuse.md` |
-| Error handling | `.ff/spec/guides/error-handling.md` |
+| Mode | Command | Behavior |
+|------|---------|----------|
+| **Auto** (default) | `sh .ff/bin/ff-update` | Update unmodified files, skip conflicts |
+| **Force** | `sh .ff/bin/ff-update --mode force` | Update all files (with backup) |
+| **Dry Run** | `sh .ff/bin/ff-update --dry-run` | Preview changes without applying |
 
-### Step 4: Document the Change
+## What Gets Updated
 
-Format for spec additions:
+| Path | Description |
+|------|-------------|
+| `.agents/skills/` | FF skills (ff-start, ff-implement, etc.) |
+| `.ff/spec/` | Specification templates |
+| `.ff/bin/` | Update tools and utilities |
+| `AGENTS.md` | Managed block only (your content outside is preserved) |
 
-```markdown
-### [Pattern/Convention Name]
+## Conflict Handling
 
-**Context**: When this applies
+When you've modified a template file and there's a new version:
 
-**Rule**: What to do
+1. **Auto mode**: Skips the file, saves new version to `.ff/conflicts/<path>.ff-new`
+2. **You review**: Compare your version with `.ff-new`
+3. **Merge manually**: Apply changes you want
+4. **Force update**: Run `--mode force` to accept all new templates
 
-**Example**:
-```code
-// Good
-...
-// Bad
-...
+## Backups
+
+All overwritten files are backed up to:
+```
+.ff/backups/<timestamp>/
 ```
 
-**Rationale**: Why this matters
+## Version Tracking
+
+Check current version:
+```bash
+cat .ff/.version
 ```
 
----
-
-## Quick Update Templates
-
-### Bug Fix → Spec Update
-
-```markdown
-## [Bug Category] Handling
-
-**Issue**: [What went wrong]
-
-**Root Cause**: [Why it happened]
-
-**Prevention**:
-- [ ] Check X before Y
-- [ ] Validate Z
-
-**Example**:
-```code
-// Before (bug)
-...
-// After (fixed)
-...
-```
+Check for updates:
+```bash
+sh .ff/bin/ff-update --dry-run
 ```
 
-### Pattern Discovery → Spec Update
-
-```markdown
-## [Pattern Name]
-
-**When to use**: [Conditions]
-
-**Implementation**:
-```code
-// Pattern code
-```
-
-**Benefits**:
-- [Benefit 1]
-- [Benefit 2]
-```
-
-### Convention → Spec Update
-
-```markdown
-## [Convention Name]
-
-**Rule**: Always/Never [do X]
-
-**Rationale**: [Why]
-
-**Enforcement**: [How to check - lint rule, code review, etc.]
-```
-
----
-
-## Spec Structure Reference
+## Workflow Integration
 
 ```
-.ff/spec/
-├── guides/
-│   ├── index.md              # Thinking guide overview
-│   ├── cross-layer.md        # Cross-layer patterns
-│   ├── code-reuse.md         # Code reuse patterns
-│   └── error-handling.md     # Error handling patterns
-├── shared/
-│   └── index.md              # TypeScript, git, code quality
-├── backend/
-│   └── index.md              # Backend-specific patterns
-└── frontend/
-    └── index.md              # Frontend-specific patterns
+┌─────────────────────────────────────┐
+│  1. Check for updates (--dry-run)   │
+│  2. Review what will change         │
+│  3. Run update (auto or force)      │
+│  4. If conflicts, merge manually    │
+│  5. load ff-start (reload context)  │
+└─────────────────────────────────────┘
 ```
 
----
+## Options
 
-## 5-Dimension Bug Analysis
-
-When updating specs after a bug fix, analyze:
-
-1. **Root Cause Category**
-   - Missing spec
-   - Cross-layer contract violation
-   - Change propagation failure
-   - Test gap
-   - Implicit assumption
-
-2. **Why It Wasn't Caught**
-   - No lint rule
-   - No type check
-   - No test coverage
-   - Unclear documentation
-
-3. **Prevention Mechanism**
-   - Documentation (spec update)
-   - Compile-time (type, lint)
-   - Runtime (validation, error handling)
-   - Test (unit, integration)
-
-4. **Systematic Check**
-   - Are there similar issues elsewhere?
-   - Is this a design flaw?
-   - Is this a process flaw?
-
-5. **Knowledge Capture**
-   - Update which spec?
-   - Create follow-up task?
-
----
-
-## Checklist Before Completing
-
-- [ ] Learning documented in correct spec file
-- [ ] Example code included (good vs bad)
-- [ ] Rationale explained
-- [ ] Related specs cross-referenced if needed
-- [ ] Consider: Should this be a lint rule instead?
+| Option | Description |
+|--------|-------------|
+| `--mode auto` | Update only unmodified files (default) |
+| `--mode force` | Update all files with backup |
+| `--dry-run` | Show what would be done |
+| `--verbose` | Show detailed output |
+| `--ref <ref>` | Use specific git ref (tag/branch) |
 
 ## After Update
 
-Inform the team:
-- Commit spec changes with clear message
-- Consider mentioning in PR description
-- If significant, discuss in team channel
+After updating, reload the context:
+```
+load ff-start
+```
+
+This ensures Amp picks up any changes to skills and specs.

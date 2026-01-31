@@ -1,0 +1,273 @@
+#!/usr/bin/env sh
+# FF Update - Smart template update engine
+set -eu
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+. "$SCRIPT_DIR/ff-lib.sh"
+
+FF_REPO_DEFAULT="fran0220/ff-project"
+FF_REF_DEFAULT="main"
+HASH_FILE=".ff/.template-hashes"
+BACKUP_ROOT=".ff/backups"
+
+MODE="auto"
+DRY_RUN=0
+VERBOSE=0
+FF_REPO=""
+FF_REF=""
+
+usage() {
+  cat <<EOF
+FF Update - Smart template update engine
+
+Usage: ff-update [options]
+
+Options:
+  --mode <auto|force>  Update mode (default: auto)
+                       auto  - Only update unmodified files, skip conflicts
+                       force - Overwrite all files (with backup)
+  --dry-run            Show what would be done without making changes
+  --verbose            Show detailed output
+  --repo <owner/repo>  GitHub repo (default: from .ff/.version or $FF_REPO_DEFAULT)
+  --ref <ref>          Git ref (default: from .ff/.version or $FF_REF_DEFAULT)
+  -h, --help           Show this help
+
+Examples:
+  ff-update                    # Auto update (safe)
+  ff-update --mode force       # Force update all templates
+  ff-update --dry-run          # Preview changes
+EOF
+}
+
+vlog() { [ "$VERBOSE" -eq 1 ] && log_info "$*" || true; }
+
+# Parse arguments
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --mode) shift; MODE="$1"; shift ;;
+    --dry-run) DRY_RUN=1; shift ;;
+    --verbose) VERBOSE=1; shift ;;
+    --repo) shift; FF_REPO="$1"; shift ;;
+    --ref) shift; FF_REF="$1"; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) die "Unknown option: $1" ;;
+  esac
+done
+
+# Load config from .ff/.version
+[ -z "$FF_REPO" ] && FF_REPO="$(read_version_field repo 2>/dev/null || echo "$FF_REPO_DEFAULT")"
+[ -z "$FF_REF" ] && FF_REF="$(read_version_field ref 2>/dev/null || echo "$FF_REF_DEFAULT")"
+
+log "🔄 FF Update"
+log "   Repo: $FF_REPO @ $FF_REF"
+log "   Mode: $MODE"
+[ "$DRY_RUN" -eq 1 ] && log "   (dry-run)"
+echo ""
+
+# Create temp directory
+TMP_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t ff-update)"
+cleanup() { rm -rf "$TMP_DIR"; }
+trap cleanup EXIT INT TERM
+
+# Download new templates
+log "📦 Downloading templates..."
+SRC_ROOT="$(download_tarball "$FF_REPO" "$FF_REF" "$TMP_DIR")" || die "Failed to download"
+TEMPLATES="$SRC_ROOT/templates"
+[ -d "$TEMPLATES" ] || die "Invalid template structure"
+
+NEW_VERSION="$(cat "$TEMPLATES/ff/VERSION" 2>/dev/null || echo "unknown")"
+CUR_VERSION="$(read_version_field ff_version 2>/dev/null || echo "none")"
+log "   Current: $CUR_VERSION → New: $NEW_VERSION"
+echo ""
+
+# Load existing hashes
+load_hash() {
+  path="$1"
+  [ -f "$HASH_FILE" ] || return 1
+  grep "^${path}:" "$HASH_FILE" | cut -d':' -f2
+}
+
+save_hash() {
+  path="$1"
+  hash="$2"
+  ensure_dir "$(dirname "$HASH_FILE")"
+  if [ -f "$HASH_FILE" ] && grep -q "^${path}:" "$HASH_FILE"; then
+    sed -i.bak "s|^${path}:.*|${path}:${hash}|" "$HASH_FILE" && rm -f "${HASH_FILE}.bak"
+  else
+    echo "${path}:${hash}" >> "$HASH_FILE"
+  fi
+}
+
+# Create backup directory
+BACKUP_DIR="$BACKUP_ROOT/$(timestamp_dir)"
+
+# Stats
+ADDED=0
+UPDATED=0
+SKIPPED=0
+CONFLICTS=0
+
+# Process a template file
+process_file() {
+  src="$1"    # Full path in downloaded templates
+  rel="$2"    # Relative path (e.g., .agents/skills/ff-start/SKILL.md)
+  dest="$rel" # Destination in project
+
+  new_hash="$(sha256_file "$src")"
+  cur_hash="$(sha256_file "$dest" 2>/dev/null || echo "")"
+  old_hash="$(load_hash "$rel" 2>/dev/null || echo "")"
+
+  # Determine action
+  if [ -z "$cur_hash" ]; then
+    # File doesn't exist - ADD
+    action="ADD"
+  elif [ "$cur_hash" = "$new_hash" ]; then
+    # Already up to date
+    action="SKIP"
+  elif [ "$cur_hash" = "$old_hash" ] || [ -z "$old_hash" ]; then
+    # User hasn't modified OR first update - safe to UPDATE
+    action="UPDATE"
+  elif [ "$MODE" = "force" ]; then
+    # Force mode - UPDATE anyway
+    action="UPDATE"
+  else
+    # User modified and new template differs - CONFLICT
+    action="CONFLICT"
+  fi
+
+  # Execute action
+  case "$action" in
+    ADD)
+      vlog "ADD: $rel"
+      if [ "$DRY_RUN" -eq 0 ]; then
+        ensure_dir "$(dirname "$dest")"
+        cp -f "$src" "$dest"
+        save_hash "$rel" "$new_hash"
+      fi
+      ADDED=$((ADDED + 1))
+      ;;
+    UPDATE)
+      vlog "UPDATE: $rel"
+      if [ "$DRY_RUN" -eq 0 ]; then
+        backup_file "$dest" "$BACKUP_DIR"
+        cp -f "$src" "$dest"
+        save_hash "$rel" "$new_hash"
+      fi
+      UPDATED=$((UPDATED + 1))
+      ;;
+    SKIP)
+      vlog "SKIP: $rel (up to date)"
+      SKIPPED=$((SKIPPED + 1))
+      ;;
+    CONFLICT)
+      log_warn "CONFLICT: $rel (user modified)"
+      if [ "$DRY_RUN" -eq 0 ]; then
+        # Save new template as .ff-new for manual merge
+        ensure_dir ".ff/conflicts/$(dirname "$rel")"
+        cp -f "$src" ".ff/conflicts/${rel}.ff-new"
+      fi
+      CONFLICTS=$((CONFLICTS + 1))
+      ;;
+  esac
+}
+
+# Process all template files
+log "📁 Processing .agents/skills/..."
+if [ -d "$TEMPLATES/agents/skills" ]; then
+  find "$TEMPLATES/agents/skills" -type f | while IFS= read -r f; do
+    rel=".agents/skills/${f#$TEMPLATES/agents/skills/}"
+    process_file "$f" "$rel"
+  done
+fi
+
+log "📚 Processing .ff/spec/..."
+if [ -d "$TEMPLATES/ff/spec" ]; then
+  find "$TEMPLATES/ff/spec" -type f | while IFS= read -r f; do
+    rel=".ff/spec/${f#$TEMPLATES/ff/spec/}"
+    process_file "$f" "$rel"
+  done
+fi
+
+log "🔧 Processing .ff/bin/..."
+if [ -d "$TEMPLATES/ff/bin" ]; then
+  find "$TEMPLATES/ff/bin" -type f | while IFS= read -r f; do
+    rel=".ff/bin/${f#$TEMPLATES/ff/bin/}"
+    process_file "$f" "$rel"
+    # Make scripts executable
+    [ "$DRY_RUN" -eq 0 ] && [ -f "$rel" ] && chmod +x "$rel"
+  done
+fi
+
+# Process .ff/.gitignore
+if [ -f "$TEMPLATES/ff/.gitignore" ]; then
+  process_file "$TEMPLATES/ff/.gitignore" ".ff/.gitignore"
+fi
+
+# Update AGENTS.md managed block
+log "📝 Processing AGENTS.md..."
+BEGIN_MARKER="<!-- ff-project:begin -->"
+END_MARKER="<!-- ff-project:end -->"
+
+if [ -f "$TEMPLATES/AGENTS.md" ]; then
+  managed_tmp="$TMP_DIR/managed_block.txt"
+  {
+    printf "%s\n" "$BEGIN_MARKER"
+    cat "$TEMPLATES/AGENTS.md"
+    printf "%s\n" "$END_MARKER"
+  } > "$managed_tmp"
+
+  if [ ! -f "AGENTS.md" ]; then
+    vlog "ADD: AGENTS.md"
+    [ "$DRY_RUN" -eq 0 ] && cp -f "$managed_tmp" "AGENTS.md"
+    ADDED=$((ADDED + 1))
+  elif grep -q "$BEGIN_MARKER" "AGENTS.md" && grep -q "$END_MARKER" "AGENTS.md"; then
+    vlog "UPDATE: AGENTS.md (managed block)"
+    if [ "$DRY_RUN" -eq 0 ]; then
+      backup_file "AGENTS.md" "$BACKUP_DIR"
+      awk -v begin="$BEGIN_MARKER" -v end="$END_MARKER" -v block="$managed_tmp" '
+        BEGIN { inblock=0 }
+        $0==begin { while ((getline line < block) > 0) print line; close(block); inblock=1; next }
+        inblock==1 && $0==end { inblock=0; next }
+        inblock==0 { print }
+      ' "AGENTS.md" > "$TMP_DIR/AGENTS.md.new" && mv "$TMP_DIR/AGENTS.md.new" "AGENTS.md"
+    fi
+    UPDATED=$((UPDATED + 1))
+  else
+    vlog "UPDATE: AGENTS.md (append block)"
+    if [ "$DRY_RUN" -eq 0 ]; then
+      backup_file "AGENTS.md" "$BACKUP_DIR"
+      printf "\n\n" >> "AGENTS.md"
+      cat "$managed_tmp" >> "AGENTS.md"
+    fi
+    UPDATED=$((UPDATED + 1))
+  fi
+fi
+
+# Update version file
+if [ "$DRY_RUN" -eq 0 ] && [ "$CONFLICTS" -eq 0 ]; then
+  write_version_field "ff_version" "$NEW_VERSION"
+  write_version_field "updated_at" "$(now_iso)"
+fi
+
+# Summary
+echo ""
+log "✨ Update complete!"
+echo ""
+log "Summary:"
+[ "$ADDED" -gt 0 ] && log "  ${GREEN}+${NC} Added: $ADDED"
+[ "$UPDATED" -gt 0 ] && log "  ${BLUE}↻${NC} Updated: $UPDATED"
+[ "$SKIPPED" -gt 0 ] && log "  ${NC}○${NC} Skipped: $SKIPPED"
+[ "$CONFLICTS" -gt 0 ] && log "  ${YELLOW}!${NC} Conflicts: $CONFLICTS"
+
+if [ "$CONFLICTS" -gt 0 ]; then
+  echo ""
+  log_warn "Conflicts detected!"
+  log "  New templates saved to: .ff/conflicts/"
+  log "  Compare with your files and merge manually."
+  log "  Then run: ff-update --mode force"
+fi
+
+if [ -d "$BACKUP_DIR" ] && [ "$(ls -A "$BACKUP_DIR" 2>/dev/null)" ]; then
+  echo ""
+  log "Backups saved to: $BACKUP_DIR"
+fi
