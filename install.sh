@@ -128,7 +128,7 @@ copy_tree() {
   find "$src" -type d | while IFS= read -r d; do
     rel="${d#$src/}"; [ "$rel" = "$d" ] && rel=""
     [ -n "$rel" ] && ensure_dir "$dest/$rel"
-  done
+  done || true
   find "$src" -type f | while IFS= read -r f; do
     rel="${f#$src/}"; out="$dest/$rel"
     full_rel="${prefix}${rel}"
@@ -145,7 +145,7 @@ copy_tree() {
     
     # Always record hash for the template file
     save_hash "$full_rel" "$new_hash"
-  done
+  done || true
 }
 
 copy_file() {
