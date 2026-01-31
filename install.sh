@@ -17,7 +17,7 @@ usage() {
 FF installer
 
 Usage:
-  curl -fsSL https://raw.githubusercontent.com/$FF_REPO_DEFAULT/$FF_REF_DEFAULT/install.sh | sh
+  curl -fsSL https://github.com/$FF_REPO_DEFAULT/raw/$FF_REF_DEFAULT/install.sh | sh
   curl -fsSL ... | sh -s -- [options]
 
 Options:

@@ -15,7 +15,7 @@ FF is a lightweight framework that leverages Amp's native features to enable str
 
 ```bash
 cd your-project
-curl -fsSL https://raw.githubusercontent.com/fran0220/ff-project/main/install.sh | sh
+curl -fsSL https://github.com/fran0220/ff-project/raw/main/install.sh | sh
 ```
 
 Options:
@@ -25,7 +25,7 @@ Options:
 
 Example with options:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/fran0220/ff-project/main/install.sh | sh -s -- --force --verbose
+curl -fsSL https://github.com/fran0220/ff-project/raw/main/install.sh | sh -s -- --force --verbose
 ```
 
 **Requirements:** `curl`, `tar`, `awk` (standard on macOS/Linux)
